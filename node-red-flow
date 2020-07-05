@@ -1,0 +1,1549 @@
+[
+    {
+        "id": "ea8c7ded.18bb9",
+        "type": "tab",
+        "label": "Туалет",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "27b51f57.4ee08",
+        "type": "mqtt in",
+        "z": "ea8c7ded.18bb9",
+        "name": "Ночной таймер старт",
+        "topic": "/home/wc/time1",
+        "qos": "2",
+        "datatype": "utf8",
+        "broker": "97f4bd69.36b658",
+        "x": 140,
+        "y": 160,
+        "wires": [
+            [
+                "e67b7110.14e78",
+                "88e42233.2fcbf"
+            ]
+        ],
+        "outputLabels": [
+            "start"
+        ]
+    },
+    {
+        "id": "e67b7110.14e78",
+        "type": "function",
+        "z": "ea8c7ded.18bb9",
+        "name": "flatStartTimer",
+        "func": "var h1 = msg.payload.substring(0,2);\nvar m1 = msg.payload.substring(2,4);\nvar flatStart = parseInt(h1)*60 + parseInt(m1);\nmsg.payload = flatStart;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 360,
+        "y": 160,
+        "wires": [
+            [
+                "c9200a51.55fbc8"
+            ]
+        ]
+    },
+    {
+        "id": "a572fac9.d47598",
+        "type": "mqtt in",
+        "z": "ea8c7ded.18bb9",
+        "name": "Ночной таймер финиш",
+        "topic": "/home/wc/time2",
+        "qos": "2",
+        "datatype": "utf8",
+        "broker": "97f4bd69.36b658",
+        "x": 140,
+        "y": 220,
+        "wires": [
+            [
+                "23ba6ac2.43c6e6",
+                "2916bdc7.cd3512"
+            ]
+        ],
+        "outputLabels": [
+            "finish"
+        ]
+    },
+    {
+        "id": "23ba6ac2.43c6e6",
+        "type": "function",
+        "z": "ea8c7ded.18bb9",
+        "name": "flatFinishTimer",
+        "func": "var h1 = msg.payload.substring(0,2);\nvar m1 = msg.payload.substring(2,4);\nvar flatFinish = parseInt(h1)*60 + parseInt(m1);\nmsg.payload = flatFinish;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 360,
+        "y": 220,
+        "wires": [
+            [
+                "95c5f4db.e19358"
+            ]
+        ]
+    },
+    {
+        "id": "79bab3ff.6b067c",
+        "type": "exec",
+        "z": "ea8c7ded.18bb9",
+        "command": "/home/pi/scripts/node-red/flattime.sh",
+        "addpay": false,
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "oldrc": false,
+        "name": "currentTime",
+        "x": 810,
+        "y": 440,
+        "wires": [
+            [
+                "66919133.4e68c"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "66919133.4e68c",
+        "type": "function",
+        "z": "ea8c7ded.18bb9",
+        "name": "strToInt",
+        "func": "var src = msg.payload;\nvar out = parseInt(src);\n//msg.flatNow = out;\n//msg.payload.flatNow = out;\nmsg.payload = out;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 980,
+        "y": 440,
+        "wires": [
+            [
+                "d34e4b8.5b31ab8"
+            ]
+        ]
+    },
+    {
+        "id": "3df3953d.eb2c6a",
+        "type": "mqtt in",
+        "z": "ea8c7ded.18bb9",
+        "name": "Внешний свет",
+        "topic": "/home/wc/ext_light_info",
+        "qos": "2",
+        "datatype": "utf8",
+        "broker": "97f4bd69.36b658",
+        "x": 120,
+        "y": 480,
+        "wires": [
+            [
+                "3304fce2.37da14"
+            ]
+        ]
+    },
+    {
+        "id": "dd38ac7a.ab5d4",
+        "type": "switch",
+        "z": "ea8c7ded.18bb9",
+        "name": "ВКЛ или ВЫКЛ?",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "str"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 2,
+        "x": 590,
+        "y": 480,
+        "wires": [
+            [
+                "79bab3ff.6b067c"
+            ],
+            [
+                "bc99bebb.e5cc9",
+                "c9c60529.6b7058"
+            ]
+        ]
+    },
+    {
+        "id": "3304fce2.37da14",
+        "type": "rbe",
+        "z": "ea8c7ded.18bb9",
+        "name": "состояние изменилось",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "property": "payload",
+        "x": 350,
+        "y": 480,
+        "wires": [
+            [
+                "dd38ac7a.ab5d4"
+            ]
+        ]
+    },
+    {
+        "id": "6e0df9d.487b208",
+        "type": "mqtt out",
+        "z": "ea8c7ded.18bb9",
+        "name": "Вытяжка ВКЛ",
+        "topic": "/home/wc/fan",
+        "qos": "2",
+        "retain": "true",
+        "broker": "97f4bd69.36b658",
+        "x": 1840,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "1cdc093b.e99217",
+        "type": "mqtt out",
+        "z": "ea8c7ded.18bb9",
+        "name": "Свет ВКЛ",
+        "topic": "/home/wc/light",
+        "qos": "2",
+        "retain": "true",
+        "broker": "97f4bd69.36b658",
+        "x": 1600,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "bc99bebb.e5cc9",
+        "type": "mqtt out",
+        "z": "ea8c7ded.18bb9",
+        "name": "Свет ВЫКЛ",
+        "topic": "/home/wc/light",
+        "qos": "2",
+        "retain": "true",
+        "broker": "97f4bd69.36b658",
+        "x": 870,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "191837f3.18d248",
+        "type": "mqtt out",
+        "z": "ea8c7ded.18bb9",
+        "name": "Вытяжка ВЫКЛ",
+        "topic": "/home/wc/fan",
+        "qos": "2",
+        "retain": "true",
+        "broker": "97f4bd69.36b658",
+        "x": 880,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "d34e4b8.5b31ab8",
+        "type": "switch",
+        "z": "ea8c7ded.18bb9",
+        "name": "isItNightOrDay",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "btwn",
+                "v": "flatStartTimer",
+                "vt": "flow",
+                "v2": "flatFinishTimer",
+                "v2t": "flow"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 2,
+        "x": 1160,
+        "y": 440,
+        "wires": [
+            [],
+            [
+                "7c883295.36e43c"
+            ]
+        ]
+    },
+    {
+        "id": "c9200a51.55fbc8",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "Установить стартовый таймер",
+        "rules": [
+            {
+                "t": "set",
+                "p": "flatStartTimer",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 610,
+        "y": 160,
+        "wires": [
+            [
+                "edf59281.9c38b"
+            ]
+        ]
+    },
+    {
+        "id": "95c5f4db.e19358",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "Установить конечный таймер",
+        "rules": [
+            {
+                "t": "set",
+                "p": "flatFinishTimer",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 610,
+        "y": 220,
+        "wires": [
+            [
+                "2226c6c1.9a45fa"
+            ]
+        ]
+    },
+    {
+        "id": "7c883295.36e43c",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "Установить ВКЛ",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "1",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1370,
+        "y": 460,
+        "wires": [
+            [
+                "1cdc093b.e99217",
+                "2a8d7ff0.57115"
+            ]
+        ]
+    },
+    {
+        "id": "edf59281.9c38b",
+        "type": "debug",
+        "z": "ea8c7ded.18bb9",
+        "name": " Что в итоге в стартовом таймере",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 920,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "2226c6c1.9a45fa",
+        "type": "debug",
+        "z": "ea8c7ded.18bb9",
+        "name": " Что в итоге в финишном таймере",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 920,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "2a41df1c.f5feb",
+        "type": "comment",
+        "z": "ea8c7ded.18bb9",
+        "name": "Иниациализация ночного таймера",
+        "info": "Читаем из retained сообщений значения начала и конца ночного режима и выставляем глобальные flow переменные для того, чтобы в дальнейшем при дёргании внешнего свеата в туалете проверять, в каком режиме мы находимся и соответственно включать либо не включать дополнительные свет и вентилятор.\nЗначения по умолчанию c 00:30 до 08:30 жестко закодены в прошивку контроллера и устанавливаются после сброса.\nВсе установки retained и QOS 2",
+        "x": 180,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "cff6baae.da28a8",
+        "type": "comment",
+        "z": "ea8c7ded.18bb9",
+        "name": "Основной флоу для света и вытяжки",
+        "info": "В этом потоке принимается решение надо или нет включать дополнительный свет и вентилятор, в зависимости от времени суток и настроек ночного таймера.\nВажный момент - ночной таймер обязательно должен начинаться не раньше чем в 00:00. Никаких 23-с-чем-то, например.\nТаймер устанавливается в формате ЧЧММ плейнтекстом.",
+        "x": 190,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "3b748d.c8542b74",
+        "type": "comment",
+        "z": "ea8c7ded.18bb9",
+        "name": "Флоу для датчика протечки",
+        "info": "",
+        "x": 160,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "6e2bceb1.623be",
+        "type": "comment",
+        "z": "ea8c7ded.18bb9",
+        "name": "поменять потом mqtt узлы на openhab узлы",
+        "info": "",
+        "x": 210,
+        "y": 20,
+        "wires": []
+    },
+    {
+        "id": "88e42233.2fcbf",
+        "type": "mqtt out",
+        "z": "ea8c7ded.18bb9",
+        "name": "Пост в инфотопик",
+        "topic": "/home/wc/time1_info",
+        "qos": "2",
+        "retain": "true",
+        "broker": "97f4bd69.36b658",
+        "x": 370,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "2916bdc7.cd3512",
+        "type": "mqtt out",
+        "z": "ea8c7ded.18bb9",
+        "name": "Пост в инфотопик",
+        "topic": "/home/wc/time2_info",
+        "qos": "2",
+        "retain": "true",
+        "broker": "97f4bd69.36b658",
+        "x": 370,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "849b57ee.589538",
+        "type": "e-mail",
+        "z": "ea8c7ded.18bb9",
+        "server": "smtp.gmail.com",
+        "port": "465",
+        "secure": true,
+        "tls": true,
+        "name": "my.super.email@gmail.com",
+        "dname": "",
+        "x": 1820,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "e9c69db5.4fcf1",
+        "type": "mqtt in",
+        "z": "ea8c7ded.18bb9",
+        "name": "Датчики протечки",
+        "topic": "/home/wc/watersensors",
+        "qos": "2",
+        "datatype": "utf8",
+        "broker": "97f4bd69.36b658",
+        "x": 130,
+        "y": 800,
+        "wires": [
+            [
+                "edd71936.a0d818",
+                "a900dae0.55ef98"
+            ]
+        ]
+    },
+    {
+        "id": "f2e29b67.d1f058",
+        "type": "switch",
+        "z": "ea8c7ded.18bb9",
+        "name": "Есть протечка?",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            },
+            {
+                "t": "btwn",
+                "v": "1",
+                "vt": "num",
+                "v2": "10",
+                "v2t": "num"
+            },
+            {
+                "t": "btwn",
+                "v": "11",
+                "vt": "num",
+                "v2": "50",
+                "v2t": "num"
+            },
+            {
+                "t": "btwn",
+                "v": "51",
+                "vt": "num",
+                "v2": "100",
+                "v2t": "num"
+            },
+            {
+                "t": "btwn",
+                "v": "101",
+                "vt": "num",
+                "v2": "255",
+                "v2t": "num"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 5,
+        "x": 680,
+        "y": 800,
+        "wires": [
+            [
+                "e9c9226f.75ba7"
+            ],
+            [
+                "4cb9e9ba.7d92b8"
+            ],
+            [
+                "2e865398.6affbc"
+            ],
+            [
+                "7a31d9ea.686338"
+            ],
+            [
+                "b99d4265.9a4f2"
+            ]
+        ]
+    },
+    {
+        "id": "4cb9e9ba.7d92b8",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "Незначительная протечка (1-10)",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "watersensors",
+                "tot": "flow"
+            },
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "Achtung! Протечка в туалете!",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1000,
+        "y": 760,
+        "wires": [
+            [
+                "426befe4.eadf8"
+            ]
+        ]
+    },
+    {
+        "id": "2e865398.6affbc",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "Протечка (11-50)",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "Протечка (11-50)",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 950,
+        "y": 800,
+        "wires": [
+            [
+                "c34a5e96.1eac3"
+            ]
+        ]
+    },
+    {
+        "id": "7a31d9ea.686338",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "Потоп (51-100)",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "Потоп (51-100)",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 940,
+        "y": 840,
+        "wires": [
+            [
+                "73ad683b.b27f68"
+            ]
+        ]
+    },
+    {
+        "id": "b99d4265.9a4f2",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "Пиздец (101-255)",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "Пиздец (101-255)",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 950,
+        "y": 880,
+        "wires": [
+            [
+                "968a031a.6648c"
+            ]
+        ]
+    },
+    {
+        "id": "e9c9226f.75ba7",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "Сухо (0)",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "В туалете сухо!",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "Всё прекрасно!",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 920,
+        "y": 720,
+        "wires": [
+            [
+                "71db0b58.fced84"
+            ]
+        ]
+    },
+    {
+        "id": "71db0b58.fced84",
+        "type": "delay",
+        "z": "ea8c7ded.18bb9",
+        "name": "Ограничитель потока почты",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "5",
+        "rateUnits": "minute",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": true,
+        "x": 1540,
+        "y": 720,
+        "wires": [
+            [
+                "849b57ee.589538"
+            ]
+        ]
+    },
+    {
+        "id": "a900dae0.55ef98",
+        "type": "rbe",
+        "z": "ea8c7ded.18bb9",
+        "name": "Значение изменилось?",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "property": "payload",
+        "x": 410,
+        "y": 800,
+        "wires": [
+            [
+                "f2e29b67.d1f058"
+            ]
+        ]
+    },
+    {
+        "id": "edd71936.a0d818",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "Сохранить значение с датчиков",
+        "rules": [
+            {
+                "t": "set",
+                "p": "watersensors",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 440,
+        "y": 740,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "426befe4.eadf8",
+        "type": "function",
+        "z": "ea8c7ded.18bb9",
+        "name": "smallFlood",
+        "func": "var val = msg.payload\nmsg.payload = \"Незначительная протечка (\" + val + \"/255)\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1250,
+        "y": 760,
+        "wires": [
+            [
+                "1d8d12e8.527efd"
+            ]
+        ]
+    },
+    {
+        "id": "c34a5e96.1eac3",
+        "type": "function",
+        "z": "ea8c7ded.18bb9",
+        "name": "Flood",
+        "func": "var val = msg.payload\nmsg.payload = \"Протечка (\" + val + \"/255)\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1230,
+        "y": 800,
+        "wires": [
+            [
+                "1d8d12e8.527efd"
+            ]
+        ]
+    },
+    {
+        "id": "73ad683b.b27f68",
+        "type": "function",
+        "z": "ea8c7ded.18bb9",
+        "name": "bigFlood",
+        "func": "var val = msg.payload\nmsg.payload = \"Потоп (\" + val + \"/255)\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1240,
+        "y": 840,
+        "wires": [
+            [
+                "1d8d12e8.527efd"
+            ]
+        ]
+    },
+    {
+        "id": "968a031a.6648c",
+        "type": "function",
+        "z": "ea8c7ded.18bb9",
+        "name": "extremeFlood",
+        "func": "var val = msg.payload\nmsg.payload = \"Пиздец (\" + val + \"/255)\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1258,
+        "y": 884,
+        "wires": [
+            [
+                "1d8d12e8.527efd"
+            ]
+        ]
+    },
+    {
+        "id": "aab2bd9b.376ae",
+        "type": "mqtt out",
+        "z": "ea8c7ded.18bb9",
+        "name": "Сигнализация ВКЛ (однократно)",
+        "topic": "/home/wc/beeper",
+        "qos": "2",
+        "retain": "false",
+        "broker": "97f4bd69.36b658",
+        "x": 2040,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "5a263474.13436c",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "1",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1780,
+        "y": 800,
+        "wires": [
+            [
+                "aab2bd9b.376ae"
+            ]
+        ]
+    },
+    {
+        "id": "1d8d12e8.527efd",
+        "type": "delay",
+        "z": "ea8c7ded.18bb9",
+        "name": "Ограничитель потока почты",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "5",
+        "rateUnits": "minute",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": true,
+        "x": 1540,
+        "y": 760,
+        "wires": [
+            [
+                "5a263474.13436c",
+                "849b57ee.589538"
+            ]
+        ]
+    },
+    {
+        "id": "8c34eac3.8d4128",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "WC:FAN_ON",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1840,
+        "y": 340,
+        "wires": [
+            [
+                "cbb1d982.21d3c8"
+            ]
+        ]
+    },
+    {
+        "id": "cbb1d982.21d3c8",
+        "type": "mqtt out",
+        "z": "ea8c7ded.18bb9",
+        "name": "лог команды FAN ON в MSG",
+        "topic": "/home/wc/msg",
+        "qos": "2",
+        "retain": "true",
+        "broker": "97f4bd69.36b658",
+        "x": 2070,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "2a8d7ff0.57115",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "WC:LIGHT_ON",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1620,
+        "y": 520,
+        "wires": [
+            [
+                "6fe50c4e.18b314"
+            ]
+        ]
+    },
+    {
+        "id": "6fe50c4e.18b314",
+        "type": "mqtt out",
+        "z": "ea8c7ded.18bb9",
+        "name": "лог команды LIGHT ON в MSG",
+        "topic": "/home/wc/msg",
+        "qos": "2",
+        "retain": "true",
+        "broker": "97f4bd69.36b658",
+        "x": 1850,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "4bf3fdc8.2b8314",
+        "type": "delay",
+        "z": "ea8c7ded.18bb9",
+        "name": "Задержка вытяжки",
+        "pauseType": "delay",
+        "timeout": "120",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 1630,
+        "y": 400,
+        "wires": [
+            [
+                "6e0df9d.487b208",
+                "8c34eac3.8d4128"
+            ]
+        ]
+    },
+    {
+        "id": "c9c60529.6b7058",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "WC:LIGHT_OFF,FAN_OFF",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 880,
+        "y": 620,
+        "wires": [
+            [
+                "cbf7729a.6cccb"
+            ]
+        ]
+    },
+    {
+        "id": "cbf7729a.6cccb",
+        "type": "mqtt out",
+        "z": "ea8c7ded.18bb9",
+        "name": "лог LIGHT_OFF,FAN_OFF в MSG",
+        "topic": "/home/wc/msg",
+        "qos": "2",
+        "retain": "true",
+        "broker": "97f4bd69.36b658",
+        "x": 1120,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "90b01155.848eb",
+        "type": "ping",
+        "z": "ea8c7ded.18bb9",
+        "name": "Ping WC",
+        "host": "192.168.0.101",
+        "timer": "20",
+        "inputs": 0,
+        "x": 100,
+        "y": 1040,
+        "wires": [
+            [
+                "2a85ad8c.3f0672"
+            ]
+        ]
+    },
+    {
+        "id": "2a85ad8c.3f0672",
+        "type": "switch",
+        "z": "ea8c7ded.18bb9",
+        "name": "Обработка результата пинга",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "false"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 2,
+        "x": 350,
+        "y": 1040,
+        "wires": [
+            [
+                "fafb3e81.a2c35"
+            ],
+            [
+                "32a3874d.d73e58"
+            ]
+        ]
+    },
+    {
+        "id": "fafb3e81.a2c35",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "OFFLINE",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "offline",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 620,
+        "y": 1000,
+        "wires": [
+            [
+                "e2493add.d64148"
+            ]
+        ]
+    },
+    {
+        "id": "766e074c.ab8a78",
+        "type": "mqtt out",
+        "z": "ea8c7ded.18bb9",
+        "name": "статус контроллера в /state",
+        "topic": "/home/wc/state",
+        "qos": "2",
+        "retain": "true",
+        "broker": "97f4bd69.36b658",
+        "x": 1080,
+        "y": 1040,
+        "wires": []
+    },
+    {
+        "id": "e2493add.d64148",
+        "type": "rbe",
+        "z": "ea8c7ded.18bb9",
+        "name": "",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "property": "payload",
+        "x": 810,
+        "y": 1040,
+        "wires": [
+            [
+                "766e074c.ab8a78"
+            ]
+        ]
+    },
+    {
+        "id": "32a3874d.d73e58",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "ONLINE",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "online",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 620,
+        "y": 1080,
+        "wires": [
+            [
+                "e2493add.d64148"
+            ]
+        ]
+    },
+    {
+        "id": "33fa5750.bee728",
+        "type": "comment",
+        "z": "ea8c7ded.18bb9",
+        "name": "Флоу проверки живой контроллер или нет",
+        "info": "",
+        "x": 210,
+        "y": 960,
+        "wires": []
+    },
+    {
+        "id": "8f3aee8.1af891",
+        "type": "mqtt in",
+        "z": "ea8c7ded.18bb9",
+        "name": "",
+        "topic": "/home/wc/gas",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "97f4bd69.36b658",
+        "x": 120,
+        "y": 1300,
+        "wires": [
+            [
+                "e9cec13d.41256"
+            ]
+        ]
+    },
+    {
+        "id": "e31132dc.2262b",
+        "type": "comment",
+        "z": "ea8c7ded.18bb9",
+        "name": "Включаем вытяжку, если газики / выключаем вытяжку, если газики рассосались",
+        "info": "Причём теперь ТОЛЬКО если газики\nВсегда не включаем (как раньше, с задержкой от света)\nвыключение с задержкой в 20 секунд после нормализации уровня газиков, чтобы избежать ситуации, когда в пограничном состоянии 199-201 пропеллер будет включаться-выключаться как ёбнутый",
+        "x": 330,
+        "y": 1240,
+        "wires": []
+    },
+    {
+        "id": "e9cec13d.41256",
+        "type": "switch",
+        "z": "ea8c7ded.18bb9",
+        "name": "Газики?",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gte",
+                "v": "210",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 2,
+        "x": 280,
+        "y": 1300,
+        "wires": [
+            [
+                "68cc0eb5.2af74"
+            ],
+            [
+                "3ea285b0.05646a"
+            ]
+        ]
+    },
+    {
+        "id": "bf04816e.9db82",
+        "type": "mqtt out",
+        "z": "ea8c7ded.18bb9",
+        "name": "Вытяжка ВКЛ",
+        "topic": "/home/wc/fan",
+        "qos": "2",
+        "retain": "true",
+        "broker": "97f4bd69.36b658",
+        "x": 1280,
+        "y": 1220,
+        "wires": []
+    },
+    {
+        "id": "3c6bf656.91eafa",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "WC:FAN_ON",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "WC:FAN_ON",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1010,
+        "y": 1280,
+        "wires": [
+            [
+                "52669da2.c0efa4"
+            ]
+        ]
+    },
+    {
+        "id": "52669da2.c0efa4",
+        "type": "mqtt out",
+        "z": "ea8c7ded.18bb9",
+        "name": "лог команды FAN ON в MSG",
+        "topic": "/home/wc/msg",
+        "qos": "2",
+        "retain": "true",
+        "broker": "97f4bd69.36b658",
+        "x": 1330,
+        "y": 1280,
+        "wires": []
+    },
+    {
+        "id": "773da48f.fa5fdc",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "1",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "1",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 990,
+        "y": 1220,
+        "wires": [
+            [
+                "bf04816e.9db82",
+                "e6f8fca2.e476e"
+            ]
+        ]
+    },
+    {
+        "id": "d7656436.eed228",
+        "type": "mqtt out",
+        "z": "ea8c7ded.18bb9",
+        "name": "Вытяжка ВЫКЛ",
+        "topic": "/home/wc/fan",
+        "qos": "2",
+        "retain": "true",
+        "broker": "97f4bd69.36b658",
+        "x": 1280,
+        "y": 1400,
+        "wires": []
+    },
+    {
+        "id": "4bc8f036.01709",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "WC:FAN_OFF",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "WC:FAN_OFF",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1020,
+        "y": 1340,
+        "wires": [
+            [
+                "c86292a9.d62f4"
+            ]
+        ]
+    },
+    {
+        "id": "c86292a9.d62f4",
+        "type": "mqtt out",
+        "z": "ea8c7ded.18bb9",
+        "name": "лог команды FAN OFF в MSG",
+        "topic": "/home/wc/msg",
+        "qos": "2",
+        "retain": "true",
+        "broker": "97f4bd69.36b658",
+        "x": 1330,
+        "y": 1340,
+        "wires": []
+    },
+    {
+        "id": "7948bbf6.4be854",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "0",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "0",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 990,
+        "y": 1400,
+        "wires": [
+            [
+                "d7656436.eed228",
+                "c54f0b79.122258"
+            ]
+        ]
+    },
+    {
+        "id": "c54f0b79.122258",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "Установить cостояние вытяжки",
+        "rules": [
+            {
+                "t": "set",
+                "p": "fanState",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1330,
+        "y": 1460,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e6f8fca2.e476e",
+        "type": "change",
+        "z": "ea8c7ded.18bb9",
+        "name": "Установить cостояние вытяжки",
+        "rules": [
+            {
+                "t": "set",
+                "p": "fanState",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1330,
+        "y": 1160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "3ea285b0.05646a",
+        "type": "switch",
+        "z": "ea8c7ded.18bb9",
+        "name": "Вытяжка уже включена?",
+        "property": "fanState",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 510,
+        "y": 1320,
+        "wires": [
+            [
+                "a9516ab7.74cf88"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "68cc0eb5.2af74",
+        "type": "switch",
+        "z": "ea8c7ded.18bb9",
+        "name": "Вытяжка уже включена?",
+        "property": "fanState",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 510,
+        "y": 1280,
+        "wires": [
+            [],
+            [
+                "3c6bf656.91eafa",
+                "773da48f.fa5fdc"
+            ]
+        ]
+    },
+    {
+        "id": "a9516ab7.74cf88",
+        "type": "delay",
+        "z": "ea8c7ded.18bb9",
+        "name": "",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "20",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": true,
+        "x": 760,
+        "y": 1340,
+        "wires": [
+            [
+                "4bc8f036.01709",
+                "7948bbf6.4be854"
+            ]
+        ]
+    },
+    {
+        "id": "97f4bd69.36b658",
+        "type": "mqtt-broker",
+        "z": "",
+        "name": "pi-broker",
+        "broker": "192.168.0.99",
+        "port": "1883",
+        "clientid": "nodered",
+        "usetls": false,
+        "compatmode": false,
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    }
+]
